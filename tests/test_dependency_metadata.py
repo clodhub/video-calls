@@ -23,7 +23,7 @@ def reviewed_delta(tree):
         if len(artifacts) != 1 or artifacts[0].attrib != {'name': expected['artifact']}:
             return False
         hashes = list(artifacts[0])
-        if len(hashes) != 1 or hashes[0].tag.rsplit('}',1)[-1] != 'sha256' or hashes[0].attrib != {'value':expected['sha256'],'origin':'Verified Maven Central and retained cache'}:
+        if len(hashes) != 1 or hashes[0].tag.rsplit('}',1)[-1] != 'sha256' or hashes[0].attrib != {'value':expected['sha256'],'origin':expected.get('origin','Verified Maven Central and retained cache')}:
             return False
         component.remove(artifacts[0])
         if not expected['componentWasPresent']:
@@ -38,7 +38,7 @@ class DependencyMetadataTests(unittest.TestCase):
     def setUp(self):
         self.tree = ET.parse(METADATA).getroot()
 
-    def test_exact_three_reviewed_hash_additions_preserve_every_existing_setting(self):
+    def test_exact_reviewed_hash_additions_preserve_every_existing_setting(self):
         self.assertTrue(reviewed_delta(self.tree))
 
     def test_existing_hash_change_is_rejected(self):
