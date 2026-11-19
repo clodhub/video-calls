@@ -30,7 +30,8 @@ if args.action == "generate":
 base = ["xcodebuild", "-quiet", "-project", str(project), "-clonedSourcePackagesDirPath", str(cache),
         "-packageCachePath", str(host / ".package-cache"), "-disablePackageRepositoryCache"]
 if args.action == "prepare":
-    subprocess.run([*base, "-resolvePackageDependencies", "-scheme", "MediaHost"], check=True, timeout=600)
+    subprocess.run([*base, "-resolvePackageDependencies", "-scheme", "MediaHost", "-derivedDataPath", str(host / ".derived-resolve")],
+                   check=True, timeout=600)
     if lock.exists() and lock.read_bytes() != resolved.read_bytes():
         raise SystemExit("Resolved lock changed; review dependency resolution before adoption")
     shutil.copyfile(resolved, lock)
