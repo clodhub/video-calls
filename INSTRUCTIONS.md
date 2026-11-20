@@ -1,6 +1,6 @@
 # Video calls instructions
 
-Package `ourapps-ae/video-calls` version `0.9.0`. It provides `media-session` (type `ae/media-session`, version 1.0.0) and optionally requires `video-calls-configuration` (type `ae/video-calls-configuration`, version 1.0.0).
+Package `ourapps-ae/video-calls` version `0.10.0`. It provides `media-session` (type `ae/media-session`, version 1.0.0) and optionally requires `video-calls-configuration` (type `ae/video-calls-configuration`, version 1.0.0).
 
 ## For the agent
 

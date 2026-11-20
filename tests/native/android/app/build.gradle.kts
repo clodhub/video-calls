@@ -8,6 +8,20 @@ dependencyLocking {
     lockMode.set(LockMode.STRICT)
 }
 
+configurations.configureEach {
+    // Build tooling libraries moved to releases that fix their published security advisories.
+    resolutionStrategy.eachDependency {
+        val patched = mapOf(
+            "io.netty" to "4.1.141.Final", "org.bouncycastle" to "1.87", "org.apache.commons:commons-compress" to "1.28.0",
+            "org.bitbucket.b_c:jose4j" to "0.9.7", "org.jdom:jdom2" to "2.0.6.1", "com.google.protobuf:protobuf-java" to "3.25.9",
+            "com.google.protobuf:protobuf-java-util" to "3.25.9", "com.google.protobuf:protobuf-kotlin" to "3.25.9",
+        )
+        val version = patched["${requested.group}:${requested.name}"] ?: patched[requested.group]?.takeUnless { requested.name.startsWith("netty-tcnative") }
+        if (version != null) useVersion(version)
+        if (requested.group == "com.google.guava" && requested.name == "guava" && requested.version?.endsWith("-jre") == true) useVersion("33.7.2-jre")
+    }
+}
+
 android {
     namespace = "app.example.media"
     compileSdk = 36

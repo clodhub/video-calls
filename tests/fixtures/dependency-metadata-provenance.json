@@ -2,7 +2,7 @@
   "frozenVersion": "0.1.1",
   "frozenPackageDigest": "a418263511b2e542cfb27ca71665ee7a21cdddeac575fa09e158e59f452f1edb",
   "frozenMetadataSha256": "19ef3e503daf67c9ab49f7d47012157b7e76e63def49efe250d5a98437ac17a5",
-  "canonicalBaselineSha256": "ee5f8a58109e7c6880e15754ee3c143438870123e93d664a530bfe1eedb452c6",
+  "canonicalBaselineSha256": "b2fca29e108f2e5f915dc4fe6034310fef2f14f68f8faf69f22f01ee4ee007ae",
   "canonicalization": "ElementTree.canonicalize(strip_text=True,rewrite_prefixes=True) over ElementTree.tostring(parsed XML)",
   "additions": [
     {"group":"com.google.guava","name":"guava-parent","version":"33.3.1-jre","artifact":"guava-parent-33.3.1-jre.pom","sha256":"55441db27e8869dfefe053059bdf478bdc7e95585642bf391f0023345fd56287","componentWasPresent":false,"url":"https://repo.maven.apache.org/maven2/com/google/guava/guava-parent/33.3.1-jre/guava-parent-33.3.1-jre.pom","publishedAlgorithm":"sha1","publishedDigest":"94729a0ed1dc35f623edd13afa6c1c2fe9a15d7c"},
