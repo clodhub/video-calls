@@ -1,10 +1,10 @@
 {
-  "id": "ourapps-ae.video-calls",
+  "id": "clodhub.video-calls",
   "name": "Video calls",
   "kind": "component",
   "status": "example",
-  "package": "ourapps-ae/video-calls",
-  "version": "0.11.0",
+  "package": "clodhub/video-calls",
+  "version": "0.12.0",
   "ports": [
     {
       "id": "video-calls-configuration",

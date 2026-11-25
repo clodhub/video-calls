@@ -14,6 +14,6 @@ Stylesheet namespaces name the actual selector and property separated by `::`, p
 
 Windows browser modules run inside the Electron host. Apple modules target iOS, television and Mac Catalyst where declared. Runtime execution coverage is recorded in signed review evidence.
 
-Maintainer: Level N Ltd. Contact: https://github.com/ourapps-ae/video-calls/issues.
+Maintainer: Level N Ltd. Contact: https://github.com/clodhub/video-calls/issues.
 
 Native resolved pins and checksums identify declared build inputs. Source revisions absent from Maven metadata are null. Maven licence lists are combined with AND; plugin-marker metadata without a licence declaration uses NOASSERTION and retains its supplied project document.

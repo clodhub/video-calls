@@ -1466,7 +1466,7 @@
       }
     }
   },
-  "x-ourapps-modules": {
+  "x-clodhub-modules": {
     "server": "verification/index.mjs"
   }
 }

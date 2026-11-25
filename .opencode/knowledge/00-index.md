@@ -1,6 +1,6 @@
 # video-calls ownership
 
-Repository: https://github.com/ourapps-ae/video-calls.git (local only; nothing pushed). Package `ourapps-ae/video-calls`, provides `media-session` (`ae/media-session`), requires `video-calls-configuration` (`ae/video-calls-configuration`). Manifest format 2.
+Repository: https://github.com/clodhub/video-calls.git. Package `clodhub/video-calls`, provides `media-session` (`ae/media-session`), requires `video-calls-configuration` (`ae/video-calls-configuration`). Manifest format 3.
 Server room handlers belong to `realtime-rooms`; game-specific client rendering belongs to the recipe.
 
 Code: `implementation/server/video.ts`, `implementation/web/video.ts`, `implementation/apple/Sources/VideoSession.swift`, `implementation/android/src/main/java/ae/video/VideoSession.kt`, and `implementation/verification/` (native, browser and provider runners).

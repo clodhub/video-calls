@@ -1,6 +1,6 @@
 # Video calls instructions
 
-Package `ourapps-ae/video-calls` version `0.11.0`. It provides `media-session` (type `ae/media-session`, version 1.0.0) and optionally requires `video-calls-configuration` (type `ae/video-calls-configuration`, version 1.0.0).
+Package `clodhub/video-calls` version `0.12.0`. It provides `media-session` (type `ae/media-session`, version 1.0.0) and optionally requires `video-calls-configuration` (type `ae/video-calls-configuration`, version 1.0.0).
 
 ## For the agent
 
@@ -31,6 +31,6 @@ From the component directory (needs `npm ci --ignore-scripts --no-audit --no-fun
 - `npm run typecheck`
 - `node --test tests/provider.test.mjs`
 - Heavy native suites (`scripts/platform-check.py apple-build|apple|android`, Xcode and Gradle) and the deployed provider suite need prepared machines and credentials; run them only deliberately.
-- `python3 -m aepm review <digest> --store STORE --policy POLICY --trusted --allow-network` checks an archive fetched with `python3 -m aepm fetch ourapps-ae/video-calls@VERSION --store STORE --from https://ourapps.app` and runs its suites.
+- `python3 -m aepm review <digest> --store STORE --policy POLICY --trusted --allow-network` checks an archive fetched with `python3 -m aepm fetch clodhub/video-calls@VERSION --store STORE --from https://clodhub.com` and runs its suites.
 
 In the application, join with two browsers, confirm each sees the other, enter display mode and confirm capture stops.
