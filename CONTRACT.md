@@ -1,39 +1,70 @@
 # Video calls
 
 ## Purpose and facilities
-media-session: Signed room grants and browser, Apple and Android media lifecycle. Local-development status; the `video-calls-configuration` requirement is optional.
+Lets the people using an application see and hear each other while they use it, the way friends around a real card table would. Each shared activity (a game table, a room) gets its own video room on a LiveKit video service. The application's server hands each person a pass for their table's room; their browser, iPhone, iPad, Mac, Apple TV or Android app joins with it, shows the others' video beside the activity and plays their sound.
+
+It looks after the parts that are easy to get wrong:
+
+- A person who is only watching can see and hear but not send video or sound.
+- A shared screen (a television showing the table, see display-mode) never gets a pass and turns the camera and microphone off at once.
+- A refused camera leaves the person in the room with sound only.
+- Muting the microphone, turning the camera off and turning the speaker off are remembered when the person comes back.
+- The application can pause the call after five idle minutes and resume it with the same pass.
+
+Passes last six hours and are signed on the server with the video service's secret, which never reaches a device. Without a video service configured, nobody gets a pass and the rest of the application works as before.
+
+Facilities: `media-session` (Video and sound between the people in a room, on the web, Apple devices and Android, through a LiveKit video service).
 
 ## User inputs
-Settings: `enabled` (boolean; default true), `serviceUrl` (address; optional; the LiveKit service as an http or https address), `keyReference` and `secretReference` (secret references to the LiveKit API key and API secret; optional). The deployment resolves the two references and passes the values to `videoEnvironment(settings, secrets)`, which builds the LIVEKIT_URL, LIVEKIT_API_KEY and LIVEKIT_API_SECRET environment that `videoGrant` and `listRooms` read (an https address becomes the wss form; disabled or incomplete settings give an empty environment and no grants). Runtime server environment supplies LIVEKIT_URL, LIVEKIT_API_KEY and LIVEKIT_API_SECRET outside source. Caller supplies roomPrefix including its separator, authenticated participant identity, display/capture callback, sound callbacks and event name. No credentials are collected into source templates.
+The installer collects four settings:
+
+- `enabled`: whether the application offers video, true or false (default true). False means no passes are issued.
+- `serviceUrl`: the address of the LiveKit video service, an http or https address (optional, no default), for example `https://my-project.livekit.cloud`. Devices connect to it as `wss://` (or `ws://` for http). Leave it empty to add it later; until then there is no video.
+- `keyReference` and `secretReference`: secret references (optional), the names under which the LiveKit API key and API secret are kept in the deployment's secret store, written as letters, digits and underscores starting with a letter. These are names only, never the key or secret themselves.
+
+The server needs all three of the address, the key and the secret; if any is missing there is no video. The deployment turns the settings and the two secrets into `LIVEKIT_URL`, `LIVEKIT_API_KEY` and `LIVEKIT_API_SECRET` (the environment the server reads) with `videoEnvironment(settings, secrets)`, or sets those three variables directly.
+
+The application also supplies, in code, the room name prefix (the same one its rooms use, including the separator, for example `ourpoker-`), who each person is and whether they may send video, and on the web a function saying whether this device may capture (false on a shared screen), whether sound is on, and display-mode's event name.
 
 ## Artefacts and dependencies
-Every implementation file maps to components/video-calls/ with its implementation/ prefix removed. SOURCE.md records each file's frozen source and line ranges; SOURCE.json records the pinned source hashes. tools.lock.json pins the tool versions. Browser livekit-client 2.23.0 and TypeScript 5.9.3 are locked in package-lock.json. Server uses WebCrypto only. tests/native/dependencies.json identifies the resolved native locks, dependency checksums and package-contained hosts.
+Every implementation file maps to `components/video-calls/` with its `implementation/` prefix removed: `server/video.ts` (passes and room listing, using only the platform's built-in cryptography), `web/video.ts` (the browser `Video` class over livekit-client 2.23.0), Swift and Kotlin `VideoSession`, and the verification helpers. SOURCE.md records where each file came from and SOURCE.json pins the source hashes; `package-lock.json` locks the browser library and TypeScript, and `tests/native/dependencies.json` identifies the locked Apple and Android LiveKit libraries and their checksums.
 
 ## Provided interfaces
-interfaces/media-session.json is an OpenRPC 1.3.2 document for ae/media-session version 1.0.0: one method per function an application calls, tagged `server` (server/video.ts), `web` (web/video.ts, the `Video` class and its `Video.*` methods), `swift` and `kotlin` (`VideoSession.*`), with types as JSON Schema 2020-12. interfaces/media-session-verification.json is a second OpenRPC 1.3.2 document for the verification helpers aepm's runner and the package's check scripts call (tagged `javascript` and `python`), with the execution context, helper result, cleanup result, provider dependencies and target coverage as JSON Schema 2020-12. The visual output connector is ae/media-session version 1.0.0.
-listRooms maps ws to http and wss to https while preserving host, port and base path; malformed/unsupported addresses, credentials, queries and fragments return null without fetching. Account-wide listing still precedes prefix filtering.
+`interfaces/media-session.json` is an OpenRPC 1.3.2 document for `ae/media-session` version 1.0.0: one method per function an application calls, tagged `server` (`server/video.ts`), `web` (`web/video.ts`, the `Video` class and its methods), `swift` and `kotlin` (`VideoSession.*`), with types as JSON Schema 2020-12. `interfaces/media-session-verification.json` is a second OpenRPC 1.3.2 document for the verification helpers that aepm's checks call.
 
 ## Required interfaces
-The `video-calls-configuration` requirement is optional: a design that has no video connects nothing to it, and the component is then simply not installed; a design that includes video-calls normally connects it, and the VideoSettings it carries can equally come from the application's own code (`videoEnvironment`). The configuration input connector is ae/video-calls-configuration version 1.0.0; interfaces/required-video-calls-configuration.json is the JSON Schema 2020-12 document of what the application supplies (settings, environment, roomPrefix, participant, browser Video options). Runtime server environment supplies LIVEKIT_URL, LIVEKIT_API_KEY and LIVEKIT_API_SECRET outside source. Caller supplies roomPrefix including its separator, authenticated participant identity, display/capture callback, sound callbacks and event name. No credentials are collected into source templates.
+`video-calls-configuration` (`ae/video-calls-configuration` version 1.0.0) is optional: the values above can come from the application's own code. `interfaces/required-video-calls-configuration.json` is the JSON Schema 2020-12 document of what the application supplies: the settings, the environment, the room prefix, the participant and the browser `Video` options.
 
 ## Integration
-See INSTRUCTIONS.md for selection and configuration and suitability.json for the LiveKit free, paid and scale profiles. Pass publish=false for spectators. Never issue a display grant. Instantiate clients with a live canCapture callback and disconnect/forget immediately on display transition. Browser listens to the supplied mode event; native callers perform disconnect. Apple sources compile in the application module; add tests/apple/CameraTests.swift to a host with those sources in the same module. Preserve game-owned participant rendering. Android imports ae.video.VideoSession. Provider grants last six hours with ten seconds clock tolerance; missing server credentials return null. See examples/consumer.ts.
+On the server, when a person asks to join their table's video:
+
+```ts
+import { videoGrant } from "./components/video-calls/server/index";
+const grant = await videoGrant(env, tableId, player.id, player.name, Date.now(), !player.spectator, "ourpoker-");
+// null when video is not configured; otherwise { url, token, room }
+```
+
+Never issue a pass to a shared screen. In the browser, create one `Video` with a function to call when its state changes and `{ canCapture, soundOn, modeEvent }`, then `connect(grant.url, grant.token, grant.room)`. Use `setMic`, `setCam` and `setSpeaker` for the person's buttons, `hold(true)` while they step away, `armIdle()` to pause after five idle minutes and `resume()` to come back, and `close()` when leaving. `monitor` and `cell` give the video tile to place on screen. Apple and Android use `VideoSession` the same way; when a device becomes a shared screen, call its disconnect. `listRooms` lists the application's rooms on the video service and who is in each. `examples/consumer.ts` is a complete example.
 
 ## Visual definition and connected examples
-visual/definition.json is the component block. visual/examples/connected.json wires an illustrative configuration provider and consumer. visual/output/connected.svg and connected.png are generated by the shared format-1 renderer; consumers require neither that tool nor its checkout. visual/output/description.md supplies the text equivalent.
+`visual/definition.json` is the component block. `visual/examples/connected.json` wires an illustrative configuration provider and consumer. `visual/output/connected.svg` and `connected.png` are the rendered diagram and `visual/output/description.md` its text equivalent.
 
 ## Infrastructure
-LiveKit service credentials and media permissions are supplied by the deployment owner. No provider is contacted by local checks. Costs are unmeasured; no deployment is verified.
+A LiveKit video service and its API key and secret, supplied by the application's owner. LiveKit Cloud's free Build plan allows 100 people connected at once and 5,000 participant minutes a month, with no card; the paid Ship plan (from $50 a month) allows 1,000. The open-source LiveKit server can also be run on your own hardware. Each device asks the person for camera and microphone permission.
 
 ## Verification
-Run npm test from the package root. In a private copy, scripts/check-apple.py prepare resolves the bundled lock; build accepts --destination phone|television|catalyst and optional --architecture arm64. Phone and television commands build test bundles without executing a simulator. Television simulator builds exclude x86_64 because the pinned LiveKitFFI library is arm64-only there.
-scripts/check-android.py prepare verifies locked downloads and runs unit tests/debug assembly; test repeats offline with strict locks/checksums. Maintainer-only resolve regenerates locks/checksums. Supply explicit Android tools and Java 17 locations; use private Gradle/home directories. scripts/check-android-locks.py verifies missing/changed-lock rejection. Android doubles and platform stubs are local simulation, not real capture/provider checks. The public constructor still creates the actual LiveKit room; its internal factory/scope constructor is for controlled tests.
-tests/test_dependency_metadata.py checks the reviewed descriptor additions against bundled provenance and preserves the complete existing verification configuration and checksum baseline.
-Format-2 declarations use the authorized context/result/ownership protocol described in interfaces/media-session-verification.json. Missing native/provider inputs remain specifically blocked. Actual native runners, provider adapters, fixture adapters and cleanup hooks are bundled; local fixture successes do not establish provider or device operation. Apple runtime and real provider interoperability remain unverified.
-Apple checks require exact code-owned expected target/type mappings and per-target non-skipped execution. The guarded schema0.5.0 parser reconciles all summary counts and rejects ambiguous repeated-run shapes; labelled parser fixtures do not establish actual task-owned result coverage.
+The required checks run without a video service or camera:
+
+- `node --test tests/video.test.mjs`: passes carry the right person, room and six-hour lifetime with a valid signature, a watcher cannot send, missing or disabled settings give no pass, room listing keeps to the application's prefix, and the browser `Video` keeps preferences through hold, sound changes, idle pause and cleanup, never captures after a switch to a shared screen, and stays in the room when the camera is refused.
+- `npm run typecheck`: the browser and server code type-check.
+- `node --test tests/provider.test.mjs`: the live-service check behaves correctly against a stand-in service, including cleaning up only the rooms it created and exposing no secret in its errors.
+- `node --test tests/browser-process.test.mjs`: the headless browser the media checks start is confined to its own profile and is always stopped.
+- The Python checks of the Apple result reader, the native check runner and the locked Android dependency list.
+
+The platform checks build the Apple app for the iPhone, Apple TV and Mac simulators and the Android test app, and run their media tests (they need Xcode or the Android tools). The deployed check, `provider-media`, joins a real LiveKit service with test participants; it needs the owner's service and keys.
 
 ## Scenarios and presentation
-A denied camera keeps the room connected. Hold preserves microphone/camera preferences; idle disconnect preserves retry grants. Remote audio follows speaker preference. Native background stops camera without changing the microphone preference. Stale browser connection completion cannot restore capture after board entry.
+Five friends play from five homes. Each sees the others' faces in small tiles round the table and hears them talk. One joins only to watch: they see and hear everyone, but their own camera never turns on. The table is also on the living-room television: it shows the cards, not the video, and its camera stays off. A player whose laptop refuses the camera still talks and listens. A player who mutes, leaves for a drink and returns is still muted.
 
 ## Updates and removal
-Patch updates use files-only migration. Caller-owned persisted preferences, desktop partitions and provider rooms are not deleted by removal. Remove generated source references when removing this component. Licence wording remains deferred.
+Updates replace the component's files. Each person's microphone, camera and speaker choices live in the application's storage and are not deleted on removal; neither are the rooms on the video service, which LiveKit closes when they are empty.
