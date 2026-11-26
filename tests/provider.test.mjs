@@ -21,11 +21,11 @@ function context() {
 }
 async function fixture(callback, options={}) {
   const directory=await fs.mkdtemp(path.join(os.tmpdir(),'media-provider-fixture-'));
-  const previous=process.env.AEPM_OWNERSHIP_DIRECTORY;
-  process.env.AEPM_OWNERSHIP_DIRECTORY=directory;
+  const previous=process.env.CLOD_OWNERSHIP_DIRECTORY;
+  process.env.CLOD_OWNERSHIP_DIRECTORY=directory;
   const rooms=new Map(); const calls=[]; const ctx=context();
   const name=`fixture-${ctx.runId}-0`;
-  if(options.preexisting) rooms.set(name,{id:name,metadata:{aepmRunId:'other-run'}});
+  if(options.preexisting) rooms.set(name,{id:name,metadata:{clodRunId:'other-run'}});
   const dependencies={
     Video,videoGrant,
     listRooms:(env,now,prefix)=>listRooms(env,now,prefix,async(url)=>Response.json(url.endsWith('ListRooms')?{rooms:[...rooms.keys()].map(name=>({name}))}:{participants:[]})),
@@ -54,7 +54,7 @@ async function fixture(callback, options={}) {
     },
   };
   try { await callback({ctx,dependencies,rooms,calls,directory}); }
-  finally { if(previous===undefined)delete process.env.AEPM_OWNERSHIP_DIRECTORY;else process.env.AEPM_OWNERSHIP_DIRECTORY=previous;await fs.rm(directory,{recursive:true,force:true}); }
+  finally { if(previous===undefined)delete process.env.CLOD_OWNERSHIP_DIRECTORY;else process.env.CLOD_OWNERSHIP_DIRECTORY=previous;await fs.rm(directory,{recursive:true,force:true}); }
 }
 
 test('fixture uses actual grants/listing and records assertions and owned cleanup without credentials',async()=>{
@@ -170,14 +170,14 @@ test('service creation requires a durable intent and deletion requires matching 
       assert.deepEqual(body.names,[name]);
       return Response.json({rooms:current?[current]:[]});
     });
-    await assert.rejects(service.createRoom({name,metadata:{aepmRunId:ctx.runId}}),/authorization-denied/);
+    await assert.rejects(service.createRoom({name,metadata:{clodRunId:ctx.runId}}),/authorization-denied/);
     const intent=await recordIntent(ctx,'provider-room',name);
-    const created=await service.createRoom({name,metadata:{aepmRunId:ctx.runId}});
+    const created=await service.createRoom({name,metadata:{clodRunId:ctx.runId}});
     await recordCreated(intent,created.id);
-    current.metadata=JSON.stringify({aepmRunId:'other-run'});
+    current.metadata=JSON.stringify({clodRunId:'other-run'});
     await assert.rejects(service.deleteRoom(name),/authorization-denied/);
     assert.ok(current);
-    current.metadata=JSON.stringify({aepmRunId:ctx.runId});
+    current.metadata=JSON.stringify({clodRunId:ctx.runId});
     await service.deleteRoom(name);
     assert.equal(await service.getRoom(name),null);
   });
@@ -185,12 +185,12 @@ test('service creation requires a durable intent and deletion requires matching 
 
 test('secret parsing and provider failures expose only fixed error codes',async()=>{
   await fixture(async({ctx,directory})=>{
-    const previous=process.env.AEPM_SECRETS_FILE;
+    const previous=process.env.CLOD_SECRETS_FILE;
     const file=path.join(directory,'malformed-secret.json');
     await fs.writeFile(file,'{"value":"synthetic-secret-marker"');
-    process.env.AEPM_SECRETS_FILE=file;
+    process.env.CLOD_SECRETS_FILE=file;
     try {await assert.rejects(readSecrets(ctx),error=>error.message==='secret-unavailable');}
-    finally {if(previous===undefined)delete process.env.AEPM_SECRETS_FILE;else process.env.AEPM_SECRETS_FILE=previous;}
+    finally {if(previous===undefined)delete process.env.CLOD_SECRETS_FILE;else process.env.CLOD_SECRETS_FILE=previous;}
     const service=createServiceAdapter(ctx,{livekitKey:'fixture',livekitSecret:'fixture'},async()=>{throw Error('synthetic-secret-marker');});
     await assert.rejects(service.getRoom(`fixture-${ctx.runId}-0`),error=>error.message==='assertion-failed');
   });
@@ -204,7 +204,7 @@ test('packaged fixture runner and cleanup exchange bound results without retaini
     await fs.mkdir(path.join(root,'ownership'));
     await fs.writeFile(path.join(root,'context.json'),JSON.stringify(ctx));
     await fs.writeFile(path.join(root,'secrets.json'),JSON.stringify({format:1,runId:ctx.runId,package:ctx.package,id:ctx.id,values:{livekitKey:{version:'one',value:'synthetic-key-marker'},livekitSecret:{version:'one',value:'synthetic-secret-marker'}}}));
-    const env={PATH:process.env.PATH,HOME:root,AEPM_CONTEXT_FILE:path.join(root,'context.json'),AEPM_SECRETS_FILE:path.join(root,'secrets.json'),AEPM_OWNERSHIP_DIRECTORY:path.join(root,'ownership'),AEPM_RESULT_FILE:path.join(root,'result.json'),AEPM_CLEANUP_RESULT_FILE:path.join(root,'cleanup.json')};
+    const env={PATH:process.env.PATH,HOME:root,CLOD_CONTEXT_FILE:path.join(root,'context.json'),CLOD_SECRETS_FILE:path.join(root,'secrets.json'),CLOD_OWNERSHIP_DIRECTORY:path.join(root,'ownership'),CLOD_RESULT_FILE:path.join(root,'result.json'),CLOD_CLEANUP_RESULT_FILE:path.join(root,'cleanup.json')};
     const runner=fileURLToPath(new URL('../implementation/verification/provider-runner.mjs',import.meta.url));
     for(const args of [[],['cleanup']]) {
       const outcome=spawnSync(process.execPath,[runner,...args],{env,encoding:'utf8',timeout:10000});
@@ -212,9 +212,9 @@ test('packaged fixture runner and cleanup exchange bound results without retaini
       assert.equal(outcome.stdout,'');
       assert.equal(outcome.stderr,'');
     }
-    const result=JSON.parse(await fs.readFile(env.AEPM_RESULT_FILE,'utf8'));
+    const result=JSON.parse(await fs.readFile(env.CLOD_RESULT_FILE,'utf8'));
     assert.ok(result.assertions.every(assertion=>assertion.passed));
-    const cleanup=JSON.parse(await fs.readFile(env.AEPM_CLEANUP_RESULT_FILE,'utf8'));
+    const cleanup=JSON.parse(await fs.readFile(env.CLOD_CLEANUP_RESULT_FILE,'utf8'));
     assert.equal(cleanup.cleanup.completed,true);
     assert.doesNotMatch(JSON.stringify([result,cleanup]),/synthetic-secret-marker|synthetic-key-marker/);
   } finally {await fs.rm(root,{recursive:true,force:true});}
@@ -226,8 +226,8 @@ test('application bridge maps identities before grants, awaits grant handoff, an
     ctx.secrets={livekitKey:{secretRef:'key',version:'one'},livekitSecret:{secretRef:'secret',version:'one'}};
     const secretFile=path.join(directory,'secrets.json');
     await fs.writeFile(secretFile,JSON.stringify({format:1,runId:ctx.runId,package:ctx.package,id:ctx.id,values:{livekitKey:{version:'one',value:'fixture-key'},livekitSecret:{version:'one',value:'fixture-secret'}}}));
-    const previous=process.env.AEPM_SECRETS_FILE;
-    process.env.AEPM_SECRETS_FILE=secretFile;
+    const previous=process.env.CLOD_SECRETS_FILE;
+    process.env.CLOD_SECRETS_FILE=secretFile;
     let applied=false;const events=[];const guards=[];const networkHandlers=[];const networkActions=[];
     const pages={};
     for(const role of ['publisher','subscriber','spectator']) pages[role]={
@@ -272,6 +272,6 @@ test('application bridge maps identities before grants, awaits grant handoff, an
       for(const role of Object.keys(pages))assert.ok(events.includes(role+'-close'));
       await networkHandlers[0]({requestId:'redirect',request:{url:'http://127.0.0.1:7880/base/rtc'},responseStatusCode:302});
       assert.ok(networkActions.some(([method,parameters])=>method==='Fetch.failRequest'&&parameters.requestId==='redirect'));
-    } finally {if(previous===undefined)delete process.env.AEPM_SECRETS_FILE;else process.env.AEPM_SECRETS_FILE=previous;}
+    } finally {if(previous===undefined)delete process.env.CLOD_SECRETS_FILE;else process.env.CLOD_SECRETS_FILE=previous;}
   });
 });

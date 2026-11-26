@@ -8,7 +8,7 @@ import { writeCanonical } from './result.mjs';
 export async function createFixtureDependencies(context) {
   if (context.mode !== 'simulation' || context.simulationKind !== 'fixture') throw new Error('authorization-denied');
   providerEndpoints(context);
-  const file = path.join(path.dirname(process.env.AEPM_CONTEXT_FILE), 'fixture-provider-' + context.runId + '.json');
+  const file = path.join(path.dirname(process.env.CLOD_CONTEXT_FILE), 'fixture-provider-' + context.runId + '.json');
   const load = async () => { try { return JSON.parse(await fs.readFile(file, 'utf8')); } catch (error) { if (error.code === 'ENOENT') return {}; throw error; } };
   const persist = value => writeCanonical(file, value);
   return {

@@ -20,8 +20,8 @@ export async function verifyMedia(context, dependencies) {
   const intent = await recordIntent(context, 'provider-room', name);
   try {
     creationAttempted = true;
-    const room = await createRoom({ name, metadata: { aepmRunId: context.runId } });
-    if (room.id !== name || room.metadata?.aepmRunId !== context.runId) throw new Error('assertion-failed');
+    const room = await createRoom({ name, metadata: { clodRunId: context.runId } });
+    if (room.id !== name || room.metadata?.clodRunId !== context.runId) throw new Error('assertion-failed');
     created = true;
     await recordCreated(intent, room.id);
     const secrets = await readSecrets();
@@ -58,7 +58,7 @@ export async function verifyMedia(context, dependencies) {
     try {
       const current = await getRoom(name);
       if (current === null) cleaned = true;
-      else if (creationAttempted && current?.id === name && current.metadata?.aepmRunId === context.runId) {
+      else if (creationAttempted && current?.id === name && current.metadata?.clodRunId === context.runId) {
         await deleteRoom(name);
         cleaned = await getRoom(name) === null;
       }

@@ -25,7 +25,7 @@ def canonical(value):
 
 
 def read_context():
-    context = json.loads(Path(os.environ['AEPM_CONTEXT_FILE']).read_text())
+    context = json.loads(Path(os.environ['CLOD_CONTEXT_FILE']).read_text())
     if context.get('format') != 1 or not re.fullmatch('[a-f0-9]{64}', context.get('runId', '')):
         raise ValueError('context-invalid')
     return context
@@ -44,11 +44,11 @@ def write_document(path, value, exclusive=False):
 
 
 def write_result(result):
-    write_document(os.environ['AEPM_RESULT_FILE'], result)
+    write_document(os.environ['CLOD_RESULT_FILE'], result)
 
 
 def write_cleanup_result(result):
-    write_document(os.environ['AEPM_CLEANUP_RESULT_FILE'], result)
+    write_document(os.environ['CLOD_CLEANUP_RESULT_FILE'], result)
 
 
 def require(context, operations):
@@ -63,7 +63,7 @@ def resources(context):
 def android_sdk(context):
     if 'androidSdk' not in resources(context):
         raise ValueError('resource-missing')
-    working = Path(os.environ['AEPM_CONTEXT_FILE']).parent / 'android-sdk-working'
+    working = Path(os.environ['CLOD_CONTEXT_FILE']).parent / 'android-sdk-working'
     if not working.is_dir():
         raise ValueError('resource-missing')
     return working
@@ -81,7 +81,7 @@ def environment(context):
     if 'androidJavaHome' in inputs:
         env['JAVA_HOME'] = str(inputs['androidJavaHome'])
         env['PATH'] = str(inputs['androidJavaHome'] / 'bin') + os.pathsep + env['PATH']
-    env['GRADLE_USER_HOME'] = str(Path(os.environ['AEPM_CONTEXT_FILE']).parent / 'gradle-working')
+    env['GRADLE_USER_HOME'] = str(Path(os.environ['CLOD_CONTEXT_FILE']).parent / 'gradle-working')
     return env
 
 
@@ -92,7 +92,7 @@ def run(context, argv, cwd=None, timeout=120, capture=False):
 
 
 def apple_set(context):
-    return Path(os.environ['AEPM_CONTEXT_FILE']).parent / 'profiles/apple' / context['runId']
+    return Path(os.environ['CLOD_CONTEXT_FILE']).parent / 'profiles/apple' / context['runId']
 
 
 def apple_environment(context):
@@ -103,7 +103,7 @@ def apple_environment(context):
 
 
 def ownership(context):
-    directory = Path(os.environ['AEPM_OWNERSHIP_DIRECTORY'])
+    directory = Path(os.environ['CLOD_OWNERSHIP_DIRECTORY'])
     result = []
     for path in sorted(directory.glob('intent-*.json')):
         intent = json.loads(path.read_text())
@@ -129,7 +129,7 @@ def prepare_apple(context, *, project, scheme, derived_data, package_cache):
     requested = 'device-' + context['runId'] + '-0'
     intent = dict(format=1, runId=context['runId'], package=context['package'], id=context['id'], counter=0,
                   kind='apple-device', requestedId=requested, namespace=context['runId'])
-    directory = Path(os.environ['AEPM_OWNERSHIP_DIRECTORY'])
+    directory = Path(os.environ['CLOD_OWNERSHIP_DIRECTORY'])
     write_document(directory / 'intent-0.json', intent, True)
     result = run(context, ['xcrun', 'simctl', '--set', private_set, 'create', requested,
                           context['settings']['appleDeviceType'], context['settings']['appleRuntime']], timeout=60, capture=True)
@@ -159,7 +159,7 @@ def artifact(file):
 
 
 def android_profile(context):
-    return Path(os.environ['AEPM_CONTEXT_FILE']).parent / 'profiles/android' / context['runId']
+    return Path(os.environ['CLOD_CONTEXT_FILE']).parent / 'profiles/android' / context['runId']
 
 
 def android_device_environment(context):
@@ -252,7 +252,7 @@ def create_android_device(context):
     name = 'device-' + context['runId'] + '-0'
     intent = dict(format=1, runId=context['runId'], package=context['package'], id=context['id'], counter=0,
                   kind='android-device', requestedId=name, namespace=context['runId'])
-    directory = Path(os.environ['AEPM_OWNERSHIP_DIRECTORY'])
+    directory = Path(os.environ['CLOD_OWNERSHIP_DIRECTORY'])
     write_document(directory / 'intent-0.json', intent, True)
     manager = sdk / 'cmdline-tools/latest/bin/avdmanager'
     subprocess.run([str(manager), 'create', 'avd', '--name', name, '--package', context['settings']['androidSystemImage'],
@@ -263,7 +263,7 @@ def create_android_device(context):
     ready = False
     try:
         server = subprocess.Popen([str(adb), '-L', f'tcp:localhost:{server_port}', '--one-device',
-                                   'aepm-no-usb-' + context['runId'], 'server', 'nodaemon'], env=env,
+                                   'clod-no-usb-' + context['runId'], 'server', 'nodaemon'], env=env,
                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         processes.append(server)
         wait_android_server(server, server_port)

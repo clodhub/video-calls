@@ -7,19 +7,19 @@
   "focus": "component",
   "definitions": [
     {
-      "id": "clodhub.video-calls",
+      "id": "com.clodhub.video-calls",
       "name": "Video calls",
       "kind": "component",
       "status": "example",
-      "package": "clodhub/video-calls",
-      "version": "0.12.0",
+      "package": "pkg:clod/com.clodhub/video-calls",
+      "version": "0.13.0",
       "ports": [
         {
           "id": "video-calls-configuration",
           "name": "Host configuration",
           "direction": "input",
           "kind": "interface",
-          "type": "ae/video-calls-configuration",
+          "type": "com.clodhub/video-calls-configuration",
           "version": "1.0.0",
           "required": false,
           "cardinality": "one"
@@ -29,7 +29,7 @@
           "name": "Video calls",
           "direction": "output",
           "kind": "interface",
-          "type": "ae/media-session",
+          "type": "com.clodhub/media-session",
           "version": "1.0.0"
         }
       ],
@@ -77,7 +77,7 @@
           "name": "Host configuration",
           "direction": "output",
           "kind": "interface",
-          "type": "ae/video-calls-configuration",
+          "type": "com.clodhub/video-calls-configuration",
           "version": "1.0.0"
         }
       ],
@@ -95,7 +95,7 @@
           "name": "Video calls",
           "direction": "input",
           "kind": "interface",
-          "type": "ae/media-session",
+          "type": "com.clodhub/media-session",
           "version": "1.0.0",
           "required": true,
           "cardinality": "one"
@@ -108,7 +108,7 @@
     {
       "id": "component",
       "name": "Video calls",
-      "definition": "clodhub.video-calls",
+      "definition": "com.clodhub.video-calls",
       "configuration": {}
     },
     {

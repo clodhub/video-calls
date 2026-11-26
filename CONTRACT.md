@@ -18,7 +18,7 @@ Facilities: `media-session` (Video and sound between the people in a room, on th
 ## User inputs
 The installer collects four settings:
 
-- `enabled`: whether the application offers video, true or false (default true). False means no passes are issued.
+- `enabled`: whether the application offers video, true or false (default true); `false` means no passes are issued.
 - `serviceUrl`: the address of the LiveKit video service, an http or https address (optional, no default), for example `https://my-project.livekit.cloud`. Devices connect to it as `wss://` (or `ws://` for http). Leave it empty to add it later; until then there is no video.
 - `keyReference` and `secretReference`: secret references (optional), the names under which the LiveKit API key and API secret are kept in the deployment's secret store, written as letters, digits and underscores starting with a letter. These are names only, never the key or secret themselves.
 
@@ -30,10 +30,10 @@ The application also supplies, in code, the room name prefix (the same one its r
 Every implementation file maps to `components/video-calls/` with its `implementation/` prefix removed: `server/video.ts` (passes and room listing, using only the platform's built-in cryptography), `web/video.ts` (the browser `Video` class over livekit-client 2.23.0), Swift and Kotlin `VideoSession`, and the verification helpers. SOURCE.md records where each file came from and SOURCE.json pins the source hashes; `package-lock.json` locks the browser library and TypeScript, and `tests/native/dependencies.json` identifies the locked Apple and Android LiveKit libraries and their checksums.
 
 ## Provided interfaces
-`interfaces/media-session.json` is an OpenRPC 1.3.2 document for `ae/media-session` version 1.0.0: one method per function an application calls, tagged `server` (`server/video.ts`), `web` (`web/video.ts`, the `Video` class and its methods), `swift` and `kotlin` (`VideoSession.*`), with types as JSON Schema 2020-12. `interfaces/media-session-verification.json` is a second OpenRPC 1.3.2 document for the verification helpers that aepm's checks call.
+`interfaces/media-session.json` is an OpenRPC 1.3.2 document for `com.clodhub/media-session` version 1.0.0: one method per function an application calls, tagged `server` (`server/video.ts`), `web` (`web/video.ts`, the `Video` class and its methods), `swift` and `kotlin` (`VideoSession.*`), with types as JSON Schema 2020-12. `interfaces/media-session-verification.json` is a second OpenRPC 1.3.2 document for the verification helpers that clod's checks call.
 
 ## Required interfaces
-`video-calls-configuration` (`ae/video-calls-configuration` version 1.0.0) is optional: the values above can come from the application's own code. `interfaces/required-video-calls-configuration.json` is the JSON Schema 2020-12 document of what the application supplies: the settings, the environment, the room prefix, the participant and the browser `Video` options.
+`video-calls-configuration` (`com.clodhub/video-calls-configuration` version 1.0.0) is optional: the values above can come from the application's own code. `interfaces/required-video-calls-configuration.json` is the JSON Schema 2020-12 document of what the application supplies: the settings, the environment, the room prefix, the participant and the browser `Video` options.
 
 ## Integration
 On the server, when a person asks to join their table's video:

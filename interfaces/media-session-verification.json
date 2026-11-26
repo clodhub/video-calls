@@ -1,9 +1,9 @@
 {
   "openrpc": "1.3.2",
   "info": {
-    "title": "ae/media-session",
+    "title": "com.clodhub/media-session",
     "version": "1.0.0",
-    "description": "Verification helpers for ae/media-session that aepm's runner and package-owned check scripts call under an authorised execution context (installed under components/video-calls/verification; npm ci --prefix components/video-calls --ignore-scripts installs their dependencies). JavaScript modules provider.mjs, adapters.mjs, result.mjs and browser-process.mjs (tagged javascript); Python modules native.py and apple_results.py (tagged python, keyword arguments after context). Results are canonical JSON with no grants, credentials or raw provider output. Simulation with simulationKind fixture uses fixture.mjs, whose frame counts are simulated; a local fixture or local provider does not establish deployed interoperability. Provider service requests need exact paired socket and service origins and configured base paths; redirects fail; account-wide ListRooms needs list-account-rooms; room creation needs a recorded run intent and deletion also checks the recorded identity and the provider's creation metadata.",
+    "description": "Verification helpers for com.clodhub/media-session that clod's runner and package-owned check scripts call under an authorised execution context (installed under components/video-calls/verification; npm ci --prefix components/video-calls --ignore-scripts installs their dependencies). JavaScript modules provider.mjs, adapters.mjs, result.mjs and browser-process.mjs (tagged javascript); Python modules native.py and apple_results.py (tagged python, keyword arguments after context). Results are canonical JSON with no grants, credentials or raw provider output. Simulation with simulationKind fixture uses fixture.mjs, whose frame counts are simulated; a local fixture or local provider does not establish deployed interoperability. Provider service requests need exact paired socket and service origins and configured base paths; redirects fail; account-wide ListRooms needs list-account-rooms; room creation needs a recorded run intent and deletion also checks the recorded identity and the provider's creation metadata.",
     "license": {
       "name": "Apache-2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0"
@@ -120,7 +120,7 @@
     },
     {
       "name": "readContext",
-      "description": "Reads and checks AEPM_CONTEXT_FILE.",
+      "description": "Reads and checks CLOD_CONTEXT_FILE.",
       "params": [],
       "result": {
         "name": "context",
@@ -141,7 +141,7 @@
     },
     {
       "name": "writeResult",
-      "description": "Writes the result atomically to AEPM_RESULT_FILE.",
+      "description": "Writes the result atomically to CLOD_RESULT_FILE.",
       "params": [
         {
           "name": "result",
@@ -171,7 +171,7 @@
     },
     {
       "name": "writeCleanupResult",
-      "description": "Writes the result atomically to AEPM_CLEANUP_RESULT_FILE.",
+      "description": "Writes the result atomically to CLOD_CLEANUP_RESULT_FILE.",
       "params": [
         {
           "name": "result",
@@ -201,7 +201,7 @@
     },
     {
       "name": "launchOwnedBrowser",
-      "description": "Starts the Chromium pinned by Playwright 1.64.1 from the private cache under AEPM_PRIVATE_ROOT, non-detached, headless with fake media devices and a private profile, and connects over the DevTools endpoint. close sends Browser.close, waits for the child and escalates to SIGTERM then SIGKILL within fixed deadlines; profiles remain for the parent's cleanup.",
+      "description": "Starts the Chromium pinned by Playwright 1.64.1 from the private cache under CLOD_PRIVATE_ROOT, non-detached, headless with fake media devices and a private profile, and connects over the DevTools endpoint. close sends Browser.close, waits for the child and escalates to SIGTERM then SIGKILL within fixed deadlines; profiles remain for the parent's cleanup.",
       "params": [
         {
           "name": "options",
@@ -211,7 +211,7 @@
             "properties": {
               "profileRoot": {
                 "type": "string",
-                "description": "Absolute, private (mode 0700), beneath AEPM_PRIVATE_ROOT; with a context, its profiles/browser."
+                "description": "Absolute, private (mode 0700), beneath CLOD_PRIVATE_ROOT; with a context, its profiles/browser."
               },
               "timeoutMilliseconds": {
                 "type": "integer",
@@ -258,7 +258,7 @@
     },
     {
       "name": "read_context",
-      "description": "Reads and checks AEPM_CONTEXT_FILE.",
+      "description": "Reads and checks CLOD_CONTEXT_FILE.",
       "params": [],
       "result": {
         "name": "context",
@@ -280,7 +280,7 @@
     },
     {
       "name": "write_result",
-      "description": "Writes the result to AEPM_RESULT_FILE.",
+      "description": "Writes the result to CLOD_RESULT_FILE.",
       "params": [
         {
           "name": "result",
@@ -306,7 +306,7 @@
     },
     {
       "name": "write_cleanup_result",
-      "description": "Writes the result to AEPM_CLEANUP_RESULT_FILE.",
+      "description": "Writes the result to CLOD_CLEANUP_RESULT_FILE.",
       "params": [
         {
           "name": "result",
@@ -787,7 +787,7 @@
     "schemas": {
       "ExecutionContext": {
         "type": "object",
-        "description": "The sanitised execution context aepm writes to AEPM_CONTEXT_FILE (the fields these helpers read).",
+        "description": "The sanitised execution context clod writes to CLOD_CONTEXT_FILE (the fields these helpers read).",
         "required": [
           "format",
           "runId",
@@ -888,7 +888,7 @@
               ],
               "additionalProperties": true
             },
-            "description": "Secret name (livekitKey, livekitSecret) to the version aepm resolved; values come from AEPM_SECRETS_FILE."
+            "description": "Secret name (livekitKey, livekitSecret) to the version clod resolved; values come from CLOD_SECRETS_FILE."
           },
           "resources": {
             "type": "array",
@@ -1082,7 +1082,7 @@
           "cleanup"
         ],
         "additionalProperties": false,
-        "description": "Written in canonical JSON to AEPM_RESULT_FILE. Holds no grants, credentials or raw provider output."
+        "description": "Written in canonical JSON to CLOD_RESULT_FILE. Holds no grants, credentials or raw provider output."
       },
       "CleanupResult": {
         "type": "object",
@@ -1120,7 +1120,7 @@
           "cleanup"
         ],
         "additionalProperties": false,
-        "description": "Written in canonical JSON to AEPM_CLEANUP_RESULT_FILE."
+        "description": "Written in canonical JSON to CLOD_CLEANUP_RESULT_FILE."
       },
       "ProviderRoom": {
         "type": "object",
@@ -1131,13 +1131,13 @@
           "metadata": {
             "type": "object",
             "properties": {
-              "aepmRunId": {
+              "clodRunId": {
                 "type": "string",
                 "pattern": "^[a-f0-9]{64}$"
               }
             },
             "required": [
-              "aepmRunId"
+              "clodRunId"
             ],
             "additionalProperties": false
           }
@@ -1217,7 +1217,7 @@
             "description": "Function (env, now, prefix) => the production listRooms through the checking fetch."
           },
           "createRoom": {
-            "description": "Function ({ name: string, metadata: { aepmRunId: string } }) => Promise<ProviderRoom>."
+            "description": "Function ({ name: string, metadata: { clodRunId: string } }) => Promise<ProviderRoom>."
           },
           "getRoom": {
             "description": "Function (id: string) => Promise<ProviderRoom | null>."

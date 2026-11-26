@@ -10,10 +10,10 @@ async function fixture(run, options = {}) {
   const privateRoot = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'owned-browser-fixture-')));
   const root = path.join(privateRoot, 'profiles');
   await fs.mkdir(root, { mode: 0o700 });
-  const priorRoot = process.env.AEPM_PRIVATE_ROOT;
-  const priorContext = process.env.AEPM_CONTEXT_FILE;
-  process.env.AEPM_PRIVATE_ROOT = privateRoot;
-  delete process.env.AEPM_CONTEXT_FILE;
+  const priorRoot = process.env.CLOD_PRIVATE_ROOT;
+  const priorContext = process.env.CLOD_CONTEXT_FILE;
+  process.env.CLOD_PRIVATE_ROOT = privateRoot;
+  delete process.env.CLOD_CONTEXT_FILE;
   const executable = path.join(privateRoot, 'chromium');
   await fs.writeFile(executable, 'fixture executable', { mode: 0o700 });
   const calls = [];
@@ -72,8 +72,8 @@ async function fixture(run, options = {}) {
   });
   try { await run({ root, executable, child, browser, calls, launch, profile: () => profile }); }
   finally {
-    if (priorRoot === undefined) delete process.env.AEPM_PRIVATE_ROOT; else process.env.AEPM_PRIVATE_ROOT = priorRoot;
-    if (priorContext === undefined) delete process.env.AEPM_CONTEXT_FILE; else process.env.AEPM_CONTEXT_FILE = priorContext;
+    if (priorRoot === undefined) delete process.env.CLOD_PRIVATE_ROOT; else process.env.CLOD_PRIVATE_ROOT = priorRoot;
+    if (priorContext === undefined) delete process.env.CLOD_CONTEXT_FILE; else process.env.CLOD_CONTEXT_FILE = priorContext;
     await written;
     await fs.rm(privateRoot, { recursive: true, force: true });
   }
@@ -89,7 +89,7 @@ test('fixed launcher inherits containment, isolates profile and sends Browser.cl
     assert.equal(spawn.settings.detached, false);
     assert.equal(spawn.settings.env.HOME, profile());
     assert.equal(spawn.settings.env.USERPROFILE, profile());
-    assert.equal(Object.hasOwn(spawn.settings.env, 'AEPM_SECRETS_FILE'), false);
+    assert.equal(Object.hasOwn(spawn.settings.env, 'CLOD_SECRETS_FILE'), false);
     assert.ok(spawn.args.includes('--password-store=basic'));
     assert.ok(spawn.args.includes('--use-mock-keychain'));
     assert.ok(!spawn.args.includes('--no-sandbox'));
@@ -161,7 +161,7 @@ test('caller cannot override executable, arguments, or select a linked/shared pr
 
 test('runner private root is mandatory and ambient executable selection is rejected', async () => {
   await fixture(async ({ root, launch, calls }) => {
-    delete process.env.AEPM_PRIVATE_ROOT;
+    delete process.env.CLOD_PRIVATE_ROOT;
     await assert.rejects(launch({ profileRoot: root }), /context-missing/);
     assert.equal(calls.length, 0);
   });
@@ -173,7 +173,7 @@ test('runner private root is mandatory and ambient executable selection is rejec
 
 test('contextual profile root must match the runner-owned browser location', async () => {
   await fixture(async ({ root, launch, calls }) => {
-    process.env.AEPM_CONTEXT_FILE = path.join(process.env.AEPM_PRIVATE_ROOT, 'protocol/context.json');
+    process.env.CLOD_CONTEXT_FILE = path.join(process.env.CLOD_PRIVATE_ROOT, 'protocol/context.json');
     await assert.rejects(launch({ profileRoot: root }), /context-invalid/);
     assert.equal(calls.length, 0);
   });
@@ -183,7 +183,7 @@ test('preparation validates HOME and cache before any ambient write and selects 
   await fixture(async ({ root }) => {
     const keys = ['HOME','USERPROFILE','APPDATA','LOCALAPPDATA','TMPDIR','TMP','TEMP','PLAYWRIGHT_BROWSERS_PATH'];
     const prior = Object.fromEntries(keys.map(key => [key, process.env[key]]));
-    const privateRoot = process.env.AEPM_PRIVATE_ROOT;
+    const privateRoot = process.env.CLOD_PRIVATE_ROOT;
     try {
       for (const key of keys) delete process.env[key];
       process.env.HOME = root;

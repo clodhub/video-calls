@@ -1,6 +1,6 @@
 package app.example.media
 
-import ae.video.VideoSession
+import com.clodhub.video.VideoSession
 import android.content.Context
 import io.livekit.android.events.BroadcastEventBus
 import io.livekit.android.events.RoomEvent

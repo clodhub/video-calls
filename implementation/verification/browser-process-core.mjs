@@ -32,7 +32,7 @@ export function insideRoot(root, value, allowRoot = false) {
 }
 
 export async function privateRootDirectory() {
-  const issuedRoot = process.env.AEPM_PRIVATE_ROOT;
+  const issuedRoot = process.env.CLOD_PRIVATE_ROOT;
   if (!issuedRoot || !path.isAbsolute(issuedRoot)) throw new Error('context-missing');
   const info = await fs.lstat(issuedRoot);
   if (!info.isDirectory() || info.isSymbolicLink() || process.platform !== 'win32' && (info.mode & 0o077)) throw new Error('resource-missing');
@@ -88,7 +88,7 @@ export function createOwnedBrowserLauncher({ spawn, chromium, now = () => perfor
     if (!rootInfo.isDirectory() || rootInfo.isSymbolicLink() || process.platform !== 'win32' && (rootInfo.mode & 0o077)) throw new Error('resource-missing');
     const profileRoot = await fs.realpath(options.profileRoot);
     if (!insideRoot(privateRoot, profileRoot)) throw new Error('resource-missing');
-    if (process.env.AEPM_CONTEXT_FILE && profileRoot !== path.resolve(path.dirname(process.env.AEPM_CONTEXT_FILE), 'profiles/browser')) throw new Error('context-invalid');
+    if (process.env.CLOD_CONTEXT_FILE && profileRoot !== path.resolve(path.dirname(process.env.CLOD_CONTEXT_FILE), 'profiles/browser')) throw new Error('context-invalid');
     const selected = chromium.executablePath();
     const executableInfo = await fs.lstat(selected);
     if (!executableInfo.isFile() || executableInfo.isSymbolicLink()) throw new Error('tool-unavailable');

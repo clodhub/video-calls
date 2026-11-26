@@ -20,7 +20,7 @@ class NativeRunnerFixtureTests(unittest.TestCase):
         self.root = Path(self.temporary.name)
         self.journal = self.root / 'ownership'
         self.journal.mkdir()
-        self.env = patch.dict(os.environ, {'AEPM_CONTEXT_FILE':str(self.root / 'context.json'), 'AEPM_OWNERSHIP_DIRECTORY':str(self.journal)})
+        self.env = patch.dict(os.environ, {'CLOD_CONTEXT_FILE':str(self.root / 'context.json'), 'CLOD_OWNERSHIP_DIRECTORY':str(self.journal)})
         self.env.start()
         self.context = dict(format=1,runId='a'*64,package='b'*64,id='native-fixture',mode='local',simulationKind=None,
                             settings=dict(applePlatform='ios-simulator',appleRuntime='fixture.runtime',appleDeviceType='fixture.device'),
@@ -134,7 +134,7 @@ class NativeRunnerFixtureTests(unittest.TestCase):
         self.assertEqual(start[-2:],['server','nodaemon'])
         self.assertFalse(any('start-server' in argv for argv,_ in commands))
         self.assertIn('--one-device',start)
-        self.assertEqual(start[start.index('--one-device')+1],'aepm-no-usb-'+self.context['runId'])
+        self.assertEqual(start[start.index('--one-device')+1],'clod-no-usb-'+self.context['runId'])
         self.assertEqual(env['ADB_MDNS_AUTO_CONNECT'],'0')
         self.assertEqual(env['ADB_LOCAL_TRANSPORT_MAX_PORT'],'0')
         self.assertEqual(env['ADB_SERVER_SOCKET'],'tcp:127.0.0.1:'+env['ANDROID_ADB_SERVER_PORT'])

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "ae/video-calls-configuration",
+  "title": "com.clodhub/video-calls-configuration",
   "x-version": "1.0.0",
   "description": "What the application supplies to video-calls: the collected settings and resolved secrets that make the server environment, the room prefix and participant passed to videoGrant, and the browser Video options.",
   "type": "object",

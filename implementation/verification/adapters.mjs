@@ -26,7 +26,7 @@ export function providerEndpoints(context) {
 
 export async function readSecrets(context) {
   try {
-    const file = JSON.parse(await fs.readFile(process.env.AEPM_SECRETS_FILE, 'utf8'));
+    const file = JSON.parse(await fs.readFile(process.env.CLOD_SECRETS_FILE, 'utf8'));
     if (file.format !== 1 || ['runId', 'package', 'id'].some(key => file[key] !== context[key])) throw new Error();
     const values = {};
     for (const name of ['livekitKey', 'livekitSecret']) {
@@ -79,11 +79,11 @@ export function createServiceAdapter(context, secrets, fetcher = fetch, endpoint
   const record = value => {
     let metadata;
     try { metadata = JSON.parse(value.metadata ?? '{}'); } catch { throw new Error('assertion-failed'); }
-    return { id: value.name, metadata: { aepmRunId: metadata.aepmRunId } };
+    return { id: value.name, metadata: { clodRunId: metadata.clodRunId } };
   };
   return {
     async createRoom({ name, metadata }) {
-      if (metadata.aepmRunId !== context.runId) throw new Error('authorization-denied');
+      if (metadata.clodRunId !== context.runId) throw new Error('authorization-denied');
       const journal = await readOwnership(context);
       if (!journal.some(({ intent, created }) => intent.kind === 'provider-room' && intent.requestedId === name && !created)) throw new Error('authorization-denied');
       return record(await call('CreateRoom', { name, metadata: JSON.stringify(metadata) }, 'create-room'));
@@ -99,7 +99,7 @@ export function createServiceAdapter(context, secrets, fetcher = fetch, endpoint
       const journal = await readOwnership(context);
       if (!journal.some(({ intent, created }) => intent.kind === 'provider-room' && intent.requestedId === name && (!created || created.resourceId === name))) throw new Error('authorization-denied');
       const found = await call('ListRooms', { names: [name] }, 'delete-created-room');
-      if (!Array.isArray(found.rooms) || found.rooms.length !== 1 || found.rooms[0].name !== name || record(found.rooms[0]).metadata.aepmRunId !== context.runId) throw new Error('authorization-denied');
+      if (!Array.isArray(found.rooms) || found.rooms.length !== 1 || found.rooms[0].name !== name || record(found.rooms[0]).metadata.clodRunId !== context.runId) throw new Error('authorization-denied');
       await call('DeleteRoom', { room: name }, 'delete-created-room');
     },
     async checkingFetch(url, options) {
@@ -132,8 +132,8 @@ async function createBrowserClients(context, grants, applicationClients, endpoin
   const bundle = await build({ entryPoints: [source], bundle: true, write: false, format: 'iife', platform: 'browser', logLevel: 'silent' });
   let ownedBrowser = null;
   if (!applicationClients) {
-    if (!process.env.AEPM_CONTEXT_FILE || !process.env.AEPM_PRIVATE_ROOT) throw new Error('context-missing');
-    const profileRoot = path.join(path.dirname(process.env.AEPM_CONTEXT_FILE), 'profiles/browser');
+    if (!process.env.CLOD_CONTEXT_FILE || !process.env.CLOD_PRIVATE_ROOT) throw new Error('context-missing');
+    const profileRoot = path.join(path.dirname(process.env.CLOD_CONTEXT_FILE), 'profiles/browser');
     await fs.mkdir(profileRoot, { recursive: true, mode: 0o700 });
     ownedBrowser = await launchOwnedBrowser({ profileRoot });
   }
@@ -269,7 +269,7 @@ export async function cleanupProvider(context) {
     try {
       const current = await service.getRoom(name);
       if (current === null) cleaned = true;
-      else if (current?.metadata?.aepmRunId === context.runId && (!created || created.resourceId === name)) {
+      else if (current?.metadata?.clodRunId === context.runId && (!created || created.resourceId === name)) {
         await service.deleteRoom(name); cleaned = await service.getRoom(name) === null;
       }
     } catch { cleaned = false; }

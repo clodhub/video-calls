@@ -1,6 +1,6 @@
 # Video calls instructions
 
-Package `clodhub/video-calls` version `0.12.0`. It provides `media-session` (type `ae/media-session`, version 1.0.0) and optionally requires `video-calls-configuration` (type `ae/video-calls-configuration`, version 1.0.0).
+Package `pkg:clod/com.clodhub/video-calls` version `0.13.0`. It provides `media-session` (type `com.clodhub/media-session`, version 1.0.0) and optionally requires `video-calls-configuration` (type `com.clodhub/video-calls-configuration`, version 1.0.0).
 
 ## For the agent
 
@@ -12,10 +12,10 @@ Package `clodhub/video-calls` version `0.12.0`. It provides `media-session` (typ
 
 ## For the developer
 
-- Install paths: `components/video-calls/server/video.ts`, `.../web/video.ts`, `.../apple/Sources/VideoSession.swift`, `.../android/src/main/java/ae/video/VideoSession.kt`, `.../verification/` (helpers for aepm checks).
+- Install paths: `components/video-calls/server/video.ts`, `.../web/video.ts`, `.../apple/Sources/VideoSession.swift`, `.../android/src/main/java/com/clodhub/video/VideoSession.kt`, `.../verification/` (helpers for clod checks).
 - Server: `videoEnvironment(settings, secrets)` builds the environment (empty when disabled or incomplete). `videoGrant(env, tableId, playerId, name, now, publish, roomPrefix)` returns `{url, token, room}` or null when credentials are missing. Use `publish=false` for spectators and never issue a display grant. Grants last six hours with ten seconds of clock tolerance. `listRooms(env, now, roomPrefix, fetcher)` lists provider rooms (account-wide, then filtered by prefix).
 - Web: `new Video(onChange, {canCapture, soundOn, modeEvent})`, then `connect(url, token, roomName)`. A false `canCapture` on the mode event disconnects and forgets the grant. `hold`, `setMic`, `setCam`, `setSpeaker`, `armIdle`, `resume`, `close`.
-- Apple: `VideoSession` on the main actor; add `tests/apple/CameraTests.swift` to a host in the same module. Android: `ae.video.VideoSession(context, canCapture)` on the main thread.
+- Apple: `VideoSession` on the main actor; add `tests/apple/CameraTests.swift` to a host in the same module. Android: `com.clodhub.video.VideoSession(context, canCapture)` on the main thread.
 - Your application renders participants; this component does not.
 - Real media, device and provider behaviour are not verified here; checks use fixtures and doubles.
 
@@ -31,6 +31,6 @@ From the component directory (needs `npm ci --ignore-scripts --no-audit --no-fun
 - `npm run typecheck`
 - `node --test tests/provider.test.mjs`
 - Heavy native suites (`scripts/platform-check.py apple-build|apple|android`, Xcode and Gradle) and the deployed provider suite need prepared machines and credentials; run them only deliberately.
-- `python3 -m aepm review <digest> --store STORE --policy POLICY --trusted --allow-network` checks an archive fetched with `python3 -m aepm fetch clodhub/video-calls@VERSION --store STORE --from https://clodhub.com` and runs its suites.
+- `python3 -m clod review <digest> --store STORE --policy POLICY --trusted --allow-network` checks an archive fetched with `python3 -m clod fetch video-calls@VERSION --store STORE --from https://clodhub.com` and runs its suites.
 
 In the application, join with two browsers, confirm each sees the other, enter display mode and confirm capture stops.

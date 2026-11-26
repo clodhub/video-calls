@@ -1,6 +1,6 @@
 package app.example.media
 
-import ae.video.VideoSession
+import com.clodhub.video.VideoSession
 import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
